@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 using ECommerce.Api.Domain;
 using ECommerce.Api.Mapping;
-using ECommerce.Api.Models;
+using ECommerce.Api.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
@@ -24,6 +25,9 @@ namespace ECommerce.Api
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+            services.AddDbContext<ECommerceContext>(options
+                => options.UseSqlServer(Configuration.GetConnectionString("ECommerceDB")));
+
             var mappingConfig = new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile(new ProductProfile());
@@ -37,7 +41,7 @@ namespace ECommerce.Api
                 c.SwaggerDoc("v1", new Info { Title = "E-Commerce API", Version = "v1" });
             });
 
-            services.AddScoped<ICatalog, Catalog>();
+            services.AddScoped<ICatalog, CatalogRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

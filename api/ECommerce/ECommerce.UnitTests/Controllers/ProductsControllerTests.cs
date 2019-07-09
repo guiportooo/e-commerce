@@ -1,6 +1,7 @@
 using AutoMapper;
 using ECommerce.Api.Controllers;
 using ECommerce.Api.Domain;
+using ECommerce.Api.Extensions;
 using ECommerce.Api.Mapping;
 using ECommerce.Api.Models;
 using FluentAssertions;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq.AutoMock;
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ECommerce.UnitTests.Controllers
 {
@@ -34,9 +36,9 @@ namespace ECommerce.UnitTests.Controllers
         }
 
         [Test]
-        public void ShouldGetAllProducts()
+        public async Task ShouldGetAllProducts()
         {
-            var allProducts = new List<Product>
+            IEnumerable<Product> allProducts = new List<Product>
             {
                 new Product(1, "Walden", 40.0m, "Description 1", Category.Books, 100),
                 new Product(2, "A hundred years of solitude", 80.0m, "Description 3", Category.Books, 50),
@@ -45,7 +47,7 @@ namespace ECommerce.UnitTests.Controllers
 
             mocker.GetMock<ICatalog>()
                 .Setup(x => x.GetAllProducts())
-                .Returns(allProducts);
+                .Returns(Task.FromResult(allProducts));
 
             var expectedProducts = new List<ProductModel>
             {
@@ -54,7 +56,7 @@ namespace ECommerce.UnitTests.Controllers
                 new ProductModel { Id = 3, Name = "iPhone 7", Price = 2400.0m, Description = "Description 2", Category = Category.Eletronics.ToString(), Available = true }
             };
 
-            var action = productsController.Get();
+            var action = await productsController.Get();
 
             var productsReturned = ((OkObjectResult)action.Result).Value;
 
@@ -62,14 +64,14 @@ namespace ECommerce.UnitTests.Controllers
         }
 
         [Test]
-        public void ShouldGetProductWithId()
+        public async Task ShouldGetProductWithId()
         {
             const int idProduct = 1;
             var product = new Product(idProduct, "Walden", 40.0m, "Description 1", Category.Books, 100);
 
             mocker.GetMock<ICatalog>()
                 .Setup(x => x.GetProductWithId(idProduct))
-                .Returns(product);
+                .Returns(Task.FromResult(product));
 
             var expectedProduct = new ProductModel
             {
@@ -81,7 +83,7 @@ namespace ECommerce.UnitTests.Controllers
                 Available = true
             };
 
-            var action = productsController.Get(idProduct);
+            var action = await productsController.Get(idProduct);
 
             var productReturned = ((OkObjectResult)action.Result).Value;
 
@@ -89,11 +91,11 @@ namespace ECommerce.UnitTests.Controllers
         }
 
         [Test]
-        public void ShouldGetProductsFromCategory()
+        public async Task ShouldGetProductsFromCategory()
         {
             var category = "Books";
 
-            var productsFromCategory = new List<Product>
+            IEnumerable<Product> productsFromCategory = new List<Product>
             {
                 new Product(1, "Walden", 40.0m, "Description 1", category.ToCategory(), 100),
                 new Product(2, "A hundred years of solitude", 80.0m, "Description 3", category.ToCategory(), 50)
@@ -101,7 +103,7 @@ namespace ECommerce.UnitTests.Controllers
 
             mocker.GetMock<ICatalog>()
                 .Setup(x => x.GetProductsFromCategory(category))
-                .Returns(productsFromCategory);
+                .Returns(Task.FromResult(productsFromCategory));
 
             var expectedProducts = new List<ProductModel>
             {
@@ -109,7 +111,7 @@ namespace ECommerce.UnitTests.Controllers
                 new ProductModel { Id = 2, Name = "A hundred years of solitude", Price = 80.0m, Description = "Description 3", Category = category, Available = true }
             };
 
-            var action = productsController.GetByCategory(category);
+            var action = await productsController.GetByCategory(category);
 
             var productsReturned = ((OkObjectResult)action.Result).Value;
 

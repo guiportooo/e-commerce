@@ -4,6 +4,7 @@ using ECommerce.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ECommerce.Api.Controllers
 {
@@ -21,13 +22,13 @@ namespace ECommerce.Api.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<ProductModel>> Get()
-            => Ok(mapper.Map<IEnumerable<ProductModel>>(catalog.GetAllProducts()));
+        public async Task<ActionResult<IEnumerable<ProductModel>>> Get()
+            => Ok(mapper.Map<IEnumerable<ProductModel>>(await catalog.GetAllProducts()));
 
         [HttpGet("{id}")]
-        public ActionResult<ProductModel> Get(int id)
+        public async Task<ActionResult<ProductModel>> Get(int id)
         {
-            var product = mapper.Map<ProductModel>(catalog.GetProductWithId(id));
+            var product = mapper.Map<ProductModel>(await catalog.GetProductWithId(id));
 
             if (product == null)
                 return NotFound();
@@ -37,9 +38,9 @@ namespace ECommerce.Api.Controllers
 
         [HttpGet()]
         [Route("category/{category}")]
-        public ActionResult<IEnumerable<ProductModel>> GetByCategory(string category)
+        public async Task<ActionResult<IEnumerable<ProductModel>>> GetByCategory(string category)
         {
-            var productsFromCategory = mapper.Map<IEnumerable<ProductModel>>(catalog.GetProductsFromCategory(category));
+            var productsFromCategory = mapper.Map<IEnumerable<ProductModel>>(await catalog.GetProductsFromCategory(category));
 
             if (!productsFromCategory.Any())
                 return NotFound();
