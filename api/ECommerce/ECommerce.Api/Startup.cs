@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using AutoMapper;
+using ECommerce.Api.Domain;
+using ECommerce.Api.Mapping;
+using ECommerce.Api.Models;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -20,10 +24,20 @@ namespace ECommerce.Api
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+            var mappingConfig = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile(new ProductProfile());
+            });
+
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "E-Commerce API", Version = "v1" });
             });
+
+            services.AddScoped<ICatalog, Catalog>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
